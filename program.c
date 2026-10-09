@@ -6,49 +6,39 @@
 int scoreJoueur = 0;
 int scoreOrdi = 0;
 
-// Déclaration AVANT l'appel
+// Déclarations AVANT les appels
 void afficher_bilan();
+void afficher_choix(int choix);
+bool partie_en_cours(int manche, int scoreJ, int scoreO);
+int saisie_joueur();
+bool joueur1_gagne(int choix1, int choix2);
 
 int main()
 {
     int manche = 1;
-    int choixJoueur;
     int choixOrdi;
 
     printf("=== PIERRE, FEUILLE, CISEAUX, LEZARD, SPOCK (7 Manches / avantage décisif de 2) ===\n");
 
-    while (manche <= 7
-        && scoreJoueur-scoreOrdi < 2
-        && scoreOrdi-scoreJoueur < 2)
+    while (partie_en_cours(manche, scoreJoueur, scoreOrdi))
     {
         printf("--- Manche %d/7 ---\n", manche);
 
         // Saisie du joueur
-        bool incorrect;
-        do
-        {
-            printf("Choix (1 = Pierre, 2 = Feuille, 3 = Ciseaux, 4 = Lézard, 5 = Spock) :");
-            scanf("%d", &choixJoueur);
-            incorrect = choixJoueur < 1 || 5 < choixJoueur;
-            if(incorrect) {
-                printf("Non valide, valeurs de 1 à 5 acceptées\n");
-            }
-        } while (incorrect);
+        int choixJoueur = saisie_joueur();
 
         // Choix aléatoire de l'ordinateur (1, 2, 3, 4 ou 5)
         choixOrdi = (rand() % 5) + 1;
-        printf("L'ordinateur a choisi : %d\n", choixOrdi);
+        printf("L'ordinateur a choisi : ");
+        afficher_choix(choixOrdi);
+        printf("\n");
 
         // Détermination du gagnant de la manche
         if (choixJoueur == choixOrdi)
         {
             printf("Égalité !\n");
         }
-        else if ((choixJoueur == 1 && (choixOrdi == 3 || choixOrdi == 4)) ||
-                 (choixJoueur == 2 && (choixOrdi == 1 || choixOrdi == 5)) ||
-                 (choixJoueur == 3 && (choixOrdi == 2 || choixOrdi == 4)) ||
-                 (choixJoueur == 4 && (choixOrdi == 2 || choixOrdi == 5)) ||
-                 (choixJoueur == 5 && (choixOrdi == 1 || choixOrdi == 3)))
+        else if (joueur1_gagne(choixJoueur, choixOrdi))
         {
             printf("Vous gagnez cette manche !\n");
             scoreJoueur = scoreJoueur + 1;
@@ -67,7 +57,67 @@ int main()
     return 0;
 }
 
-// Définition (peut être placée après main puisque déclarée avant)
+// Retourne true si la partie doit continuer
+bool partie_en_cours(int manche, int scoreJ, int scoreO)
+{
+    return manche <= 7
+        && scoreJ - scoreO < 2
+        && scoreO - scoreJ < 2;
+}
+
+// Affiche le menu, répète la saisie tant que la réponse est erronée et retourne le choix
+int saisie_joueur()
+{
+    int choix;
+    bool incorrect;
+    do
+    {
+        // Menu affiché grâce à une boucle for et afficher_choix
+        printf("Choix (");
+        for (int i = 1; i <= 5; i++)
+        {
+            printf("%d = ", i);
+            afficher_choix(i);
+            if (i < 5)
+            {
+                printf(", ");
+            }
+        }
+        printf(") :");
+        scanf("%d", &choix);
+        incorrect = choix < 1 || 5 < choix;
+        if (incorrect)
+        {
+            printf("Non valide, valeurs de 1 à 5 acceptées\n");
+        }
+    } while (incorrect);
+    return choix;
+}
+
+// Retourne true si le premier choix gagne contre le second
+bool joueur1_gagne(int choix1, int choix2)
+{
+    return (choix1 == 1 && (choix2 == 3 || choix2 == 4)) ||
+           (choix1 == 2 && (choix2 == 1 || choix2 == 5)) ||
+           (choix1 == 3 && (choix2 == 2 || choix2 == 4)) ||
+           (choix1 == 4 && (choix2 == 2 || choix2 == 5)) ||
+           (choix1 == 5 && (choix2 == 1 || choix2 == 3));
+}
+
+// Affiche le nom du choix correspondant au nombre passé en paramètre
+void afficher_choix(int choix)
+{
+    switch (choix)
+    {
+        case 1 : printf("Pierre"); break;
+        case 2 : printf("Feuille"); break;
+        case 3 : printf("Ciseaux"); break;
+        case 4 : printf("Lézard"); break;
+        case 5 : printf("Spock"); break;
+        default : printf("Inconnu"); break;
+    }
+}
+
 void afficher_bilan()
 {
     printf("=== FIN DE LA PARTIE ===\n");
